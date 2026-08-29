@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "Tekphreak Thread Styler",
+  "version": "1.0.1",
+  "description": "Adds a floating text-styling toolbar to the Threads composer. Style selected text as monospace, italic, small caps, bold italic, or sans-serif bold using real Unicode characters — no servers, no data collection.",
+  "author": "Tekphreak",
+  "homepage_url": "https://tekphreak.com",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.threads.net/*",
+        "*://*.threads.com/*"
+      ],
+      "js": ["content.js"],
+      "css": ["styles.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}
