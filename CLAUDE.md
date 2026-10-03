@@ -16,8 +16,13 @@ permissions beyond the two host matches.
   `execCommand('insertText', …)` to write the styled text back into the
   composer (fires the input events Threads' React/Lexical editor needs).
 - `styles.css` — toolbar styling.
-- `icons/` — generated via ImageMagick from a gradient "T" SVG (see git
-  history / conversation for regeneration command if needed).
+- `icons/` — black rounded-square plate with a huge #525252 "@" behind the
+  label (bigger than the plate, so it bleeds off the edges) and the label in
+  #F2F2F2 bold italic on top: "STYLE" at 48/128px, a single big "S" at 16/32px
+  (five letters are not legible that small). Regenerate with
+  `python3 make_icons.py` (Pillow + DejaVu Sans fonts); each size is drawn at
+  1024px and downscaled. The generator is not part of the Web Store zip.
+- `make_icons.py` — the icon generator above.
 
 ## Known Threads quirks
 - Threads' composer has its own native "Mark as spoiler" selection popup.
