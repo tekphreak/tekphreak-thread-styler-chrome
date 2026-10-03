@@ -35,6 +35,11 @@
   const ITALIC = buildMap(0x1d434, 0x1d44e, null, { h: 'ℎ' }); // italic h has no math slot
   const BOLD_ITALIC = buildMap(0x1d468, 0x1d482, null);
   const SANS_BOLD = buildMap(0x1d5d4, 0x1d5ee, 0x1d7ec);
+  const BOLD = buildMap(0x1d400, 0x1d41a, 0x1d7ce);
+  const SANS_ITALIC = buildMap(0x1d608, 0x1d622, null); // used by the disclaimer button
+
+  // Fullwidth Latin (U+FF21 / U+FF41 / digits U+FF10)
+  const FULLWIDTH = buildMap(0xff21, 0xff41, 0xff10);
 
   // IPA Extensions / Phonetic Extensions small-caps letters
   const SMALL_CAPS = {
@@ -51,6 +56,9 @@
     italic: ITALIC,
     boldItalic: BOLD_ITALIC,
     sansBold: SANS_BOLD,
+    sansItalic: SANS_ITALIC,
+    bold: BOLD,
+    fullwidth: FULLWIDTH,
     smallCaps: SMALL_CAPS
   };
 
@@ -82,13 +90,20 @@
     return out;
   }
 
+  // "ⓘ " (U+24D8 + space), prepended to the whole composer rather than the selection.
+  const DISCLAIMER_PREFIX = 'ⓘ ';
+
+  // Each label is rendered in the Unicode style the button produces.
   const STYLE_BUTTONS = [
     { key: 'normal', label: 'Normal' },
-    { key: 'monospace', label: 'Mono' },
-    { key: 'italic', label: 'Italic' },
+    { key: 'monospace', label: applyStyle('Mono', 'monospace') },
+    { key: 'italic', label: applyStyle('Italic', 'italic') },
     { key: 'smallCaps', label: 'ᴀᴄᴏ' },
-    { key: 'boldItalic', label: 'Bold It' },
-    { key: 'sansBold', label: 'Sans B' }
+    { key: 'boldItalic', label: applyStyle('Bold It', 'boldItalic') },
+    { key: 'sansBold', label: applyStyle('Sans B', 'sansBold') },
+    { key: 'bold', label: applyStyle('Bold', 'bold') },
+    { key: 'fullwidth', label: 'Ｗｉｄｅ' },
+    { key: 'antifaDisclaimer', label: DISCLAIMER_PREFIX + applyStyle('disclaimer', 'sansItalic') }
   ];
 
   let toolbarEl = null;
@@ -140,11 +155,38 @@
     positionToolbar(rect);
   }
 
+  // "ⓘ disclaimer": puts "ⓘ " in front of the whole composer and restyles the
+  // text after it as Mathematical Sans-Serif Italic (same as the web app).
+  function prependDisclaimer(editableEl) {
+    if (!editableEl || !editableEl.textContent.trim()) return;
+    if (editableEl.textContent.startsWith(DISCLAIMER_PREFIX)) return;
+
+    editableEl.focus({ preventScroll: true });
+    const range = document.createRange();
+    range.selectNodeContents(editableEl); // the whole composer, not just the selection
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+
+    // Undo any existing styling first so letters aren't double-converted.
+    const text = normalizeText(selection.toString());
+    const newText = DISCLAIMER_PREFIX + applyStyle(text, 'sansItalic');
+
+    // execCommand fires the input events Threads' editor needs to register the change.
+    document.execCommand('insertText', false, newText);
+  }
+
   function applyStyleToSelection(styleKey) {
     if (!savedRange) return;
 
     const editableEl = isEditable(savedRange.commonAncestorContainer);
     if (editableEl) editableEl.focus({ preventScroll: true });
+
+    if (styleKey === 'antifaDisclaimer') {
+      prependDisclaimer(editableEl);
+      removeToolbar();
+      return;
+    }
 
     const selection = window.getSelection();
     selection.removeAllRanges();

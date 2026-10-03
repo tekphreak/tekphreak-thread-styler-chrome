@@ -11,7 +11,7 @@ permissions beyond the two host matches.
 ## Files
 - `manifest.json` — MV3, content script only, scoped to threads.net/threads.com.
 - `content.js` — style tables (monospace, italic, bold italic, sans bold,
-  small caps) built from Unicode codepoint offsets, a reverse map for
+  bold, fullwidth, small caps) built from Unicode codepoint offsets, a reverse map for
   "Normal" (strip styling), selection-triggered floating toolbar, and
   `execCommand('insertText', …)` to write the styled text back into the
   composer (fires the input events Threads' React/Lexical editor needs).
@@ -40,5 +40,11 @@ python3 -c "import json; json.load(open('manifest.json'))"
 ```
 Then reload unpacked at `chrome://extensions` and manually test on a
 Threads reply/composer box — type text, select it, confirm the toolbar
-appears and each of the six style buttons works, including "Normal" to
-revert styled text back to plain ASCII.
+appears and each of the eight style buttons works, including "Normal" to
+revert styled text back to plain ASCII. Toolbar labels are rendered in the
+style each button produces. Also check the `ⓘ disclaimer` button: it acts on
+the *whole* composer (not just the selection) — it prepends "ⓘ " (U+24D8 +
+space) and restyles the rest of the text as Mathematical Sans-Serif Italic
+(U+1D608…), undoing any earlier styling first. It does nothing if the text
+already starts with that prefix. Same behavior as the web app at
+tekphreak.com/apps/threadstyler/.
